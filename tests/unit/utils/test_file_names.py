@@ -8,3 +8,10 @@ class TestFileNames:
             actual
             == "prefix__min_items_1__min_confidence_2__min_interest_3__node_wt_4.html"
         )
+
+    def test_create_file_name_from_params__interest(self):
+        actual = create_file_name_from_params("prefix", 2, 10, 20, "absolute_size")
+        assert (
+            actual
+            == "prefix__min_items_1__min_confidence_2__min_interest_3__node_wt_4.html"
+        )

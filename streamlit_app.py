@@ -41,7 +41,7 @@ with main_Section:
     )
 
     st.markdown(
-        "**Each node represents a subreddit and edge represents strength between subreddits.**"
+        "**Each node represents a subreddit and an edge from subreddit A to subreddit B represents the confidence a random user of subreddit A is also active in subreddit B.**"
     )
     st.markdown("---")
 
@@ -150,13 +150,10 @@ with main_Section:
             )
 
             submitted = st.form_submit_button("Load Graph")
-            min_conf = convert_percentage_to_fraction_string(confidence_value)
-            min_interest = convert_percentage_to_fraction_string(interest_value)
-            min_items = str(min_items_value)
-            size = str(node_sizing).lower().replace(" ", "_")
+
 
             graph_file_name = create_file_name_from_params(
-                "association_graph", min_items, min_conf, min_interest, size
+                "association_graph", min_items_value, confidence_value, interest_value, node_sizing
             )
 
             (url, plotted_graph_date, errors) = generate_url(
