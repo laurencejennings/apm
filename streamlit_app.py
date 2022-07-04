@@ -10,9 +10,6 @@ from apm_streamlit_app.utils.caching_functions import cache_comments_of_subreddi
 from apm_streamlit_app.utils.dates import get_date_n_days_before_today
 from apm_streamlit_app.utils.error_messages import failed_to_load_graph
 from apm_streamlit_app.utils.file_names import create_file_name_from_params
-from apm_streamlit_app.utils.input_manipulation import (
-    convert_percentage_to_fraction_string,
-)
 from apm_streamlit_app.utils.kpe_utils import read_kpe_pickle
 from apm_streamlit_app.utils.pagination import paginator
 from apm_streamlit_app.utils.urls import generate_url
@@ -151,9 +148,12 @@ with main_Section:
 
             submitted = st.form_submit_button("Load Graph")
 
-
             graph_file_name = create_file_name_from_params(
-                "association_graph", min_items_value, confidence_value, interest_value, node_sizing
+                "association_graph",
+                min_items_value,
+                confidence_value,
+                interest_value,
+                node_sizing,
             )
 
             (url, plotted_graph_date, errors) = generate_url(

@@ -1,14 +1,17 @@
 from typing import Union
 
-from apm_streamlit_app.utils.input_manipulation import convert_percentage_to_fraction_string
+from apm_streamlit_app.utils.input_manipulation import (
+    convert_percentage_to_fraction_string,
+)
 
 
 def create_file_name_from_params(
-        prefix: str,
-        min_items_value: int,
-        confidence_value: int,
-        interest_value: Union[str,int],
-        node_sizing: str) -> str:
+    prefix: str,
+    min_items_value: int,
+    confidence_value: int,
+    interest_value: Union[str, int],
+    node_sizing: str,
+) -> str:
     min_conf = convert_percentage_to_fraction_string(confidence_value)
     min_interest = convert_percentage_to_fraction_string(interest_value)
     min_items = str(min_items_value)

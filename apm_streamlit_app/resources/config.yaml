@@ -1,6 +1,6 @@
 version: 1.4
 paths:
-  s3_base_url: "https://sagemaker-eu-west-1-100701698608.s3.eu-west-1.amazonaws.com/reddit_graph_data/test"
+  s3_base_url: "https://sagemaker-eu-west-1-100701698608.s3.eu-west-1.amazonaws.com/reddit_graph_data"
   kps_filename: "topics_comments.pkl"
 
 dates:
