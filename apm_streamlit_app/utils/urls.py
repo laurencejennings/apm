@@ -1,12 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from typing import Any, Dict, List
 
 import requests  # type: ignore
 
 
-def generate_url(graph_date: datetime, fname: str, config: Dict[str, Any]):
-    failed_dates: List[datetime] = []
-    errors: List[datetime] = []
+def generate_url(graph_date: date, fname: str, config: Dict[str, Any]):
+    failed_dates: List[date] = []
+    errors: List[date] = []
     for index in range(0, 6):
         cur_date = graph_date - timedelta(days=index)
         url = f"{config.get('paths')['s3_base_url']}/{cur_date.strftime('%Y-%m-%d')}/{fname}"

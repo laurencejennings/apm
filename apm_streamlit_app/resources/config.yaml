@@ -4,7 +4,7 @@ paths:
   kps_filename: "topics_comments.pkl"
 
 dates:
-  days_before_today: 0
+  days_before_today: 1
 
 graph_settings:
   n_days: 5
