@@ -21,11 +21,15 @@ def paginator(label, topics_df, comments_per_page=3):
     location = st.empty()
     n_pages = (len(topics_df) - 1) // comments_per_page + 1
     page_format_func = lambda i: "Page %s" % i
-    if n_pages>1:
-        page_number = location.selectbox(f'{label} -- pages: {n_pages}', range(1, n_pages+1), format_func=page_format_func)
+    if n_pages > 1:
+        page_number = location.selectbox(
+            f"{label} -- pages: {n_pages}",
+            range(1, n_pages + 1),
+            format_func=page_format_func,
+        )
     else:
         page_number = 1
-    min_index = (page_number-1) * comments_per_page
+    min_index = (page_number - 1) * comments_per_page
     max_index = (min_index) + comments_per_page
 
     return topics_df[min_index:max_index]

@@ -1,6 +1,7 @@
+streamlit
 boto3==1.22.1
 pyyaml
 s3fs
 pandas
 requests
-streamlit
+cloudpathlib

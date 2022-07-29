@@ -7,14 +7,37 @@ import streamlit.components.v1 as components
 
 from apm_streamlit_app.config.config_loader import CONFIG_PATH, read_config_from_path
 from apm_streamlit_app.utils.caching_functions import cache_comments_of_subreddit
+from apm_streamlit_app.utils.data_scraping_report import get_past_n_days_report_dataframe
 from apm_streamlit_app.utils.dates import get_date_n_days_before_today
 from apm_streamlit_app.utils.error_messages import failed_to_load_graph
 from apm_streamlit_app.utils.file_names import create_file_name_from_params
-from apm_streamlit_app.utils.kpe_utils import read_kpe_pickle
+from apm_streamlit_app.utils.kpe_utils import (
+    get_key_phrase_comments,
+    get_key_phrases,
+    get_kpe_subreddits,
+)
 from apm_streamlit_app.utils.pagination import paginator
 from apm_streamlit_app.utils.urls import generate_url
 
 st.set_page_config(layout="wide")
+
+st.markdown("""
+        <style>
+               .css-18e3th9 {
+                    padding-top: 0rem;
+                    padding-bottom: 3rem;
+                    padding-left: 3rem;
+                    padding-right: 3rem;
+                }
+               .css-1d391kg {
+                    padding-top: 0rem;
+                    padding-right: 1rem;
+                    padding-bottom: 3rem;
+                    padding-left: 1rem;
+                }
+        </style>
+        """, unsafe_allow_html=True)
+
 st.title("Aaquaverse Passion Maps")
 st.markdown("**APM version 1.4**")
 main_Section = st.container()
@@ -24,11 +47,12 @@ charts_Section = st.container()
 
 config = read_config_from_path(CONFIG_PATH)
 GRAPH_DATE = get_date_n_days_before_today(config.get("dates")["days_before_today"])
+kpe_topics_path = f"{config.get('paths')['kpe_s3_url']}/{GRAPH_DATE.strftime('%Y-%m-%d')}/topics_comments"
+subreddits_with_topics = get_kpe_subreddits(kpe_topics_path)
 
-with st.spinner("Loading topics data"):
-    comments_kpes_per_subreddit = read_kpe_pickle(GRAPH_DATE, config)
-
-subreddits_with_topics = list(comments_kpes_per_subreddit.keys())
+n_days = config.get("graph_settings")["n_days"]
+report_name = config.get("scraping_report")["report_name"]
+scraping_report_df= get_past_n_days_report_dataframe(n_days, report_name, GRAPH_DATE, config)
 
 with main_Section:
     st.header("MAGIC graph")
@@ -45,12 +69,15 @@ with main_Section:
     st.markdown(
         f'<p style="color:Red;font-size:20px;">Note</p>', unsafe_allow_html=True
     )
-    st.markdown(
-        f"The subreddits appear in the graph if they have had active users in the past {config.get('graph_settings')['n_days']} days"
-    )
+
     st.markdown(
         f"**These graphs were produced using data from the past {config.get('graph_settings')['n_days']} days**"
     )
+
+    with st.expander("View data scraping report", expanded=False):
+        c1, c2 = st.columns((1, 3))
+        with c1:
+            st.write(scraping_report_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
     st.header("Subreddit topics")
     with st.expander("Explore subreddit topics", expanded=False):
@@ -62,24 +89,24 @@ with main_Section:
             )
 
             if subreddit_to_explore is not None:
-                subreddit_kps = list(
-                    comments_kpes_per_subreddit[subreddit_to_explore].keys()
-                )[2:]
+                subreddit_kps = get_key_phrases(kpe_topics_path, subreddit_to_explore)
                 if len(subreddit_kps):
                     st.write("Showing data for:", subreddit_to_explore)
-                    # at the moment these lines are commented because we are using too few comments.
-                    # st.write(f'Number of comments used for key phrase extraction in {option} subreddit:',
-                    #          comments_kpe_subreddit[option]['kpe_num_comments'])
 
                     kp_to_explore = st.selectbox(
-                        "topics to explore:", [None] + subreddit_kps
+                        "Topics to explore:", [None] + subreddit_kps
                     )
                     if kp_to_explore:
                         st.write("Showing data for topic:", kp_to_explore)
                         comments = cache_comments_of_subreddit(
-                            comments_kpes_per_subreddit[subreddit_to_explore][
-                                kp_to_explore
-                            ]
+                            get_key_phrase_comments(
+                                kpe_topics_path, subreddit_to_explore, kp_to_explore
+                            )
+                        )
+                        # uncommented as max comments is 1000 right now - at the moment these lines are commented because we are using too few comments.
+                        st.write(
+                            f"Number of comments used for key phrase extraction in {subreddit_to_explore} subreddit:",
+                            comments["kpe_num_comments"][0],
                         )
 
                         if len(comments):
@@ -197,7 +224,6 @@ with plot_Section:
         f"The communities appear in the graph if they have had active users in the past {config.get('graph_settings')['n_days']} days"
     )
     c1, c2 = st.columns((1, 1))
-    graph_date = date(2022, 6, 29)
     with c1:
         c1.header("MAGIC Graph")
         st.markdown("**Graph parameters used are below.**")
@@ -207,7 +233,7 @@ with plot_Section:
         st.markdown("Node Sizing: Absolute Size")
         base_file_name = "association_graph__min_items_2__min_confidence_0_05__min_interest_-1_0__node_wt_absolute_size.html"
         (url, plotted_graph_date, errors) = generate_url(
-            graph_date, base_file_name, config
+            GRAPH_DATE, base_file_name, config
         )
 
         if len(errors):
@@ -223,10 +249,11 @@ with plot_Section:
         st.markdown("Node Sizing: Absolute Size")
         base_file_name_communtiy = "greedy__association_graph__min_items_2__min_confidence_0_05__min_interest_-1_0__node_wt_absolute_size.html"
         (url, plotted_graph_date, errors) = generate_url(
-            graph_date, base_file_name_communtiy, config
+            GRAPH_DATE, base_file_name_communtiy, config
         )
 
         if len(errors):
             st.error(failed_to_load_graph(errors[-1]))
         else:
             components.html(urllib.request.urlopen(url).read(), height=900)
+

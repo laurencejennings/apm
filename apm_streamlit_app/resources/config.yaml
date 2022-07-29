@@ -1,7 +1,9 @@
 version: 1.4
 paths:
   s3_base_url: "https://sagemaker-eu-west-1-100701698608.s3.eu-west-1.amazonaws.com/reddit_graph_data"
-  kps_filename: "topics_comments.pkl"
+  kpe_s3_url: "s3://sagemaker-eu-west-1-100701698608/reddit_graph_data"
+  s3_report_base_url: "https://sagemaker-eu-west-1-100701698608.s3.eu-west-1.amazonaws.com/data_scraping_report"
+
 
 dates:
   days_before_today: 1
@@ -11,3 +13,6 @@ graph_settings:
 
 paginator:
   comments_per_page: 3
+
+scraping_report:
+  report_name: "data_scraping.xlsx"
